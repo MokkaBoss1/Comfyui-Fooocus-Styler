@@ -1,3 +1,13 @@
+# Fooocus Styler is a simple variant of the standard SDXL Styler for Comfyui at the https://github.com/twri/sdxl_prompt_styler
+
+all credit goes to them 
+
+My only contribution is to use different .json style files which are re-used from Fooocus.
+
+----------------------------------------------------------------------------------------------
+
+
+
 # SDXL Prompt Styler, a custom node for ComfyUI
 
 ### SDXL Prompt Styler
