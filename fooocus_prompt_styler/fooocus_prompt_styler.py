@@ -300,7 +300,7 @@ class FooocusPromptStylerAdvanced:
     RETURN_TYPES = ('STRING','STRING','STRING','STRING','STRING','STRING',)
     RETURN_NAMES = ('text_positive_g','text_positive_l','text_positive','text_negative_g','text_negative_l','text_negative',)
     FUNCTION = 'prompt_styler_advanced'
-    CATEGORY = 'utils'
+    CATEGORY = '👑 MokkaBoss1/Text'
 
     def prompt_styler_advanced(self, text_positive_g, text_positive_l, text_negative, style, negative_prompt_to, copy_to_l, log_prompt):
         # Process and combine prompts in templates
