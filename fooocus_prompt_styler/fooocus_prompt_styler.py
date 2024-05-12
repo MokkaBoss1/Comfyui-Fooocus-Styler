@@ -248,9 +248,9 @@ class FooocusPromptStyler:
         return {
             "required": {
                 "clip": ("CLIP",),
-                "text_positive": ("STRING", {"default": "Pretty 21 year old European Woman,", "multiline": True}),
-                "text_negative": ("STRING", {"default": "nsfw, nude, naked, nipples,", "multiline": True}),
-                "style": ((styles), ),
+                "text_positive": ("STRING", {"default": "", "multiline": True}),
+                "text_negative": ("STRING", {"default": "", "multiline": True}),
+                "style": ((styles), {"default": "base"}),
 #                "log_prompt": ("BOOLEAN", {"default": True, "label_on": "yes", "label_off": "no"}),
 #                "style_positive": ("BOOLEAN", {"default": True, "label_on": "yes", "label_off": "no"}),
 #                "style_negative": ("BOOLEAN", {"default": True, "label_on": "yes", "label_off": "no"}),
@@ -298,12 +298,7 @@ class FooocusPromptStyler:
         text_negative = clean_text(text_negative)
         text_positive_styled = clean_text(text_positive_styled)
         text_negative_styled = clean_text(text_negative_styled)
-
-        text_positive = remove_comma_at_end(text_positive)
-        text_negative = remove_comma_at_end(text_negative)
-        text_positive_styled = remove_comma_at_end(text_positive_styled)
-        text_negative_styled = remove_comma_at_end(text_negative_styled)
-        
+      
         if log_prompt:
             print(f"style: {style}")
             print(f"text_positive: {text_positive}")
@@ -313,6 +308,12 @@ class FooocusPromptStyler:
 
         text_positive_styled += ", " + add_pos_style
         text_negative_styled += ", " + add_neg_style
+
+        text_positive = remove_comma_at_end(text_positive)
+        text_negative = remove_comma_at_end(text_negative)
+        text_positive_styled = remove_comma_at_end(text_positive_styled)
+        text_negative_styled = remove_comma_at_end(text_negative_styled)
+
 
         tokens_pos = clip.tokenize(text_positive_styled)
         cond_pos, pooled = clip.encode_from_tokens(tokens_pos, return_pooled=True)
