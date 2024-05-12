@@ -1,5 +1,14 @@
 import json
 import os
+import re
+
+# Function to clean text
+def clean_text(text):
+    text = re.sub(r' {3,}', ' ', text)    # Replace three or more spaces with a single space
+    text = re.sub(r' {2}', ' ', text)     # Replace two spaces with a single space
+    text = re.sub(r',{2,}', ',', text)    # Replace two or more commas with a single comma
+    text = re.sub(r', ,', ',', text)      # Replace ", ," with ","
+    return text
 
 def read_json_file(file_path):
     """
@@ -222,8 +231,6 @@ def read_fooocus_templates_replace_and_combine_advanced(json_data, template_name
 
 class FooocusPromptStyler:
 
-    def __init__(self):
-        pass
 
     @classmethod
     def INPUT_TYPES(self):
@@ -232,24 +239,34 @@ class FooocusPromptStyler:
         
         return {
             "required": {
-                "text_positive": ("STRING", {"default": "", "multiline": True}),
-                "text_negative": ("STRING", {"default": "", "multiline": True}),
+                "clip": ("CLIP",),
+                "text_positive": ("STRING", {"default": "Pretty 21 year old European Woman,", "multiline": True}),
+                "text_negative": ("STRING", {"default": "nsfw, nude, naked, nipples,", "multiline": True}),
                 "style": ((styles), ),
-                "log_prompt": ("BOOLEAN", {"default": True, "label_on": "yes", "label_off": "no"}),
-                "style_positive": ("BOOLEAN", {"default": True, "label_on": "yes", "label_off": "no"}),
-                "style_negative": ("BOOLEAN", {"default": True, "label_on": "yes", "label_off": "no"}),
+#                "log_prompt": ("BOOLEAN", {"default": True, "label_on": "yes", "label_off": "no"}),
+#                "style_positive": ("BOOLEAN", {"default": True, "label_on": "yes", "label_off": "no"}),
+#                "style_negative": ("BOOLEAN", {"default": True, "label_on": "yes", "label_off": "no"}),
             },
+ 
+            "optional": {
+                "add_pos_style": ("STRING", {"multiline": True}),
+                "add_neg_style": ("STRING", {"multiline": True}),
+            },    
         }
 
-    RETURN_TYPES = ('STRING','STRING',)
-    RETURN_NAMES = ('text_positive','text_negative',)
+    RETURN_TYPES = ('STRING','STRING',"CONDITIONING","CONDITIONING")
+    RETURN_NAMES = ('text_positive','text_negative','Positive Conditioning','Negative Conditioning',)
     FUNCTION = 'prompt_styler'
     CATEGORY = '👑 MokkaBoss1/Text'
 
-    def prompt_styler(self, text_positive, text_negative, style, log_prompt, style_positive, style_negative):
+    def prompt_styler(self, text_positive, text_negative, add_pos_style, add_neg_style, style, clip):
         # Process and combine prompts in templates
         # The function replaces the positive prompt placeholder in the template,
         # and combines the negative prompt with the template's negative prompt, if they exist.
+        log_prompt = True
+        style_positive = True
+        style_negative = True
+        
         text_positive_styled, text_negative_styled = read_fooocus_templates_replace_and_combine(self.json_data, style, text_positive, text_negative)
 
         # If style_negative is disabled, set text_negative_styled to text_negative
@@ -266,6 +283,15 @@ class FooocusPromptStyler:
  
         # If logging is enabled (log_prompt is set to "Yes"), 
         # print the style, positive and negative text, and positive and negative prompts to the console
+ 
+
+        # Applying the cleaning function
+        text_positive = clean_text(text_positive)
+        text_negative = clean_text(text_negative)
+        text_positive_styled = clean_text(text_positive_styled)
+        text_negative_styled = clean_text(text_negative_styled)
+
+        
         if log_prompt:
             print(f"style: {style}")
             print(f"text_positive: {text_positive}")
@@ -273,7 +299,23 @@ class FooocusPromptStyler:
             print(f"text_positive_styled: {text_positive_styled}")
             print(f"text_negative_styled: {text_negative_styled}")
 
-        return text_positive_styled, text_negative_styled
+        text_positive_styled += ", " + add_pos_style
+        text_negative_styled += ", " + add_neg_style
+
+        tokens_pos = clip.tokenize(text_positive_styled)
+        cond_pos, pooled = clip.encode_from_tokens(tokens_pos, return_pooled=True)
+        
+        tokens_neg = clip.tokenize(text_negative_styled)
+        cond_neg, pooled = clip.encode_from_tokens(tokens_neg, return_pooled=True)
+
+        
+
+        return (
+            text_positive_styled,
+            text_negative_styled,
+            [[cond_pos, {"pooled_output": pooled}]],
+            [[cond_neg, {"pooled_output": pooled}]],
+            ) 
     
 class FooocusPromptStylerAdvanced:
 
@@ -287,6 +329,7 @@ class FooocusPromptStylerAdvanced:
         
         return {
             "required": {
+                "clip": ("CLIP",),
                 "text_positive_g": ("STRING", {"default": "", "multiline": True}),
                 "text_positive_l": ("STRING", {"default": "", "multiline": True}),
                 "text_negative": ("STRING", {"default": "", "multiline": True}),
@@ -297,10 +340,10 @@ class FooocusPromptStylerAdvanced:
             },
         }
 
-    RETURN_TYPES = ('STRING','STRING','STRING','STRING','STRING','STRING',)
+    RETURN_TYPES = ('STRING','STRING','STRING','STRING','STRING','STRING','CONDITIONING','CONDITIONING')
     RETURN_NAMES = ('text_positive_g','text_positive_l','text_positive','text_negative_g','text_negative_l','text_negative',)
     FUNCTION = 'prompt_styler_advanced'
-    CATEGORY = '👑 MokkaBoss1/Text'
+    CATEGORY = 'utils'
 
     def prompt_styler_advanced(self, text_positive_g, text_positive_l, text_negative, style, negative_prompt_to, copy_to_l, log_prompt):
         # Process and combine prompts in templates
@@ -310,6 +353,15 @@ class FooocusPromptStylerAdvanced:
  
         # If logging is enabled (log_prompt is set to "Yes"), 
         # print the style, positive and negative text, and positive and negative prompts to the console
+        # remove double spaces
+        
+        text_positive_g = re.sub(r'  ', ' ', text_positive_g)
+        text_positive_l = re.sub(r'  ', ' ', text_positive_l)
+        text_positive_g_styled = re.sub(r'  ', ' ', text_positive_g_styled)
+        text_positive_l_styled = re.sub(r'  ', ' ', text_positive_l_styled)
+        text_negative_g_styled = re.sub(r'  ', ' ', text_negative_g_styled)
+        text_negative_styled = re.sub(r'  ', ' ', text_negative_styled)
+
         if log_prompt:
             print(f"style: {style}")
             print(f"text_positive_g: {text_positive_g}")
@@ -324,13 +376,12 @@ class FooocusPromptStylerAdvanced:
 
         return text_positive_g_styled, text_positive_l_styled, text_positive_styled, text_negative_g_styled, text_negative_l_styled, text_negative_styled
 
-
 NODE_CLASS_MAPPINGS = {
     "FooocusPromptStyler": FooocusPromptStyler,
     "FooocusPromptStylerAdvanced": FooocusPromptStylerAdvanced,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "FooocusPromptStyler": "Fooocus Prompt Styler",
+    "FooocusPromptStyler": "👑 Fooocus Prompt Styler",
     "FooocusPromptStylerAdvanced": "Fooocus Prompt Styler Advanced",
 }
