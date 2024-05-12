@@ -55,7 +55,7 @@
         "negative_prompt": "border, frame"
 	},
 	{
-        "name": "000 Art Deco René Lalique",
+        "name": "000 Art Deco Rene Lalique",
 		"prompt": "art deco painting in the style of Willem de Kooning, {prompt}",
         "negative_prompt": "border, frame"
 	},
@@ -90,7 +90,7 @@
         "negative_prompt": "border, frame"
 	},
 	{
-        "name": "000 Baroque Diego Velázquez",
+        "name": "000 Baroque Diego Velazquez",
 		"prompt": "baroque painting in the style of Diego Velázquez, {prompt}",
         "negative_prompt": "border, frame"
 	},
@@ -170,7 +170,7 @@
         "negative_prompt": "border, frame"
 	},
 	{
-        "name": "000 Dadaism Hannah Höch",
+        "name": "000 Dadaism Hannah Hoech",
 		"prompt": "dadaism painting in the style of Hannah Höch, {prompt}",
         "negative_prompt": "border, frame"
 	},
@@ -190,12 +190,12 @@
         "negative_prompt": "border, frame"
 	},	
 	{
-        "name": "000 Expressionism Gabriele Münter",
+        "name": "000 Expressionism Gabriele Muenter",
 		"prompt": "expressionism painting in the style of Gabriele Münter, {prompt}",
         "negative_prompt": "border, frame"
 	},	
 	{
-        "name": "000 Expressionism Käthe Kollwitz",
+        "name": "000 Expressionism Kaethe Kollwitz",
 		"prompt": "expressionism painting in the style of Käthe Kollwitz, {prompt}",
         "negative_prompt": "border, frame"
 	},	
@@ -290,6 +290,21 @@
 		"prompt": "line art drawing undefined . professional, sleek, modern, minimalist, graphic, line art, vector graphics, {prompt}",
         "negative_prompt": "anime, photorealistic, 35mm film, deformed, glitch, blurry, noisy, off-center, deformed, cross-eyed, closed eyes, bad anatomy, ugly, disfigured, mutated, realism, realistic, impressionism, expressionism, oil, acrylic undefined, {prompt}"
 	},
+	{
+        "name": "000 Sarah",
+		"prompt": "21 year old, pretty European model, medium breasts, {prompt}",
+        "negative_prompt": "sfw, nude, naked, nipples, {prompt}"
+	},
+		{
+        "name": "000 Sarah Studio",
+		"prompt": "plaing gradient background, {prompt}",
+        "negative_prompt": ""
+	},
+	
+	
+	
+	
+	
 	{
         "name": "000 SFW",
 		"prompt": "{prompt}",
