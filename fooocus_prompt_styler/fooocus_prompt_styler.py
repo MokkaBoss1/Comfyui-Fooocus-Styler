@@ -2,6 +2,14 @@ import json
 import os
 import re
 
+#function to remove trailing spaces and a last comma
+def remove_comma_at_end(s):
+    s = s.rstrip()  # Remove trailing whitespace
+    if s.endswith(','):
+        s = s[:-1]
+    return s
+
+
 # Function to clean text
 def clean_text(text):
     text = re.sub(r' {3,}', ' ', text)    # Replace three or more spaces with a single space
@@ -291,6 +299,10 @@ class FooocusPromptStyler:
         text_positive_styled = clean_text(text_positive_styled)
         text_negative_styled = clean_text(text_negative_styled)
 
+        text_positive = remove_comma_at_end(text_positive)
+        text_negative = remove_comma_at_end(text_negative)
+        text_positive_styled = remove_comma_at_end(text_positive_styled)
+        text_negative_styled = remove_comma_at_end(text_negative_styled)
         
         if log_prompt:
             print(f"style: {style}")
