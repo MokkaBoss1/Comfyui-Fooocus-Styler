@@ -329,6 +329,91 @@ class FooocusPromptStyler:
             [[cond_pos, {"pooled_output": pooled}]],
             [[cond_neg, {"pooled_output": pooled}]],
             ) 
+
+
+class FooocusPromptStylerChained:
+
+    @classmethod
+    def INPUT_TYPES(self):
+        current_directory = os.path.dirname(os.path.realpath(__file__))
+        self.json_data, styles = load_styles_from_directory(current_directory)
+        
+        return {
+            "required": {
+                "clip": ("CLIP",),
+                "text_positive": ("STRING", {"default": "", "multiline": True}),
+                "text_negative": ("STRING", {"default": "", "multiline": True}),
+                "style1": ((styles), {"default": "base"}),
+                "style2": ((styles), {"default": "base"}),
+                "style3": ((styles), {"default": "base"}),
+            },
+        }
+
+    RETURN_TYPES = ('STRING','STRING',"CONDITIONING","CONDITIONING")
+    RETURN_NAMES = ('text_positive','text_negative','Positive Conditioning','Negative Conditioning',)
+    FUNCTION = 'prompt_styler'
+    CATEGORY = '👑 MokkaBoss1/Text'
+
+    def prompt_styler(self, text_positive, text_negative, style1, style2, style3, clip):
+        # Process and combine prompts in templates
+        log_prompt = True
+        style_positive = True
+        style_negative = True
+
+        # Apply the first style
+        text_positive_styled, text_negative_styled = read_fooocus_templates_replace_and_combine(self.json_data, style1, text_positive, text_negative)
+        
+        # Apply the second style
+        text_positive_styled, text_negative_styled = read_fooocus_templates_replace_and_combine(self.json_data, style2, text_positive_styled, text_negative_styled)
+
+        # Apply the third style
+        text_positive_styled, text_negative_styled = read_fooocus_templates_replace_and_combine(self.json_data, style3, text_positive_styled, text_negative_styled)
+
+        # If style_positive is disabled, set text_positive_styled to text_positive
+        if not style_positive:
+            text_positive_styled = text_positive
+            if log_prompt:
+                print(f"style_positive: disabled")
+
+        # If style_negative is disabled, set text_negative_styled to text_negative
+        if not style_negative:
+            text_negative_styled = text_negative
+            if log_prompt:
+                print(f"style_negative: disabled")
+ 
+        # Applying the cleaning function
+        text_positive = clean_text(text_positive)
+        text_negative = clean_text(text_negative)
+        text_positive_styled = clean_text(text_positive_styled)
+        text_negative_styled = clean_text(text_negative_styled)
+      
+        if log_prompt:
+            print(f"style1: {style1}, style2: {style2}, style3: {style3}")
+            print(f"text_positive: {text_positive}")
+            print(f"text_negative: {text_negative}")
+            print(f"text_positive_styled: {text_positive_styled}")
+            print(f"text_negative_styled: {text_negative_styled}")
+
+        text_positive = remove_comma_at_end(text_positive)
+        text_negative = remove_comma_at_end(text_negative)
+        text_positive_styled = remove_comma_at_end(text_positive_styled)
+        text_negative_styled = remove_comma_at_end(text_negative_styled)
+
+        tokens_pos = clip.tokenize(text_positive_styled)
+        cond_pos, pooled = clip.encode_from_tokens(tokens_pos, return_pooled=True)
+        
+        tokens_neg = clip.tokenize(text_negative_styled)
+        cond_neg, pooled = clip.encode_from_tokens(tokens_neg, return_pooled=True)
+
+        return (
+            text_positive_styled,
+            text_negative_styled,
+            [[cond_pos, {"pooled_output": pooled}]],
+            [[cond_neg, {"pooled_output": pooled}]],
+        )
+
+
+
     
 class FooocusPromptStylerAdvanced:
 
@@ -389,12 +474,16 @@ class FooocusPromptStylerAdvanced:
 
         return text_positive_g_styled, text_positive_l_styled, text_positive_styled, text_negative_g_styled, text_negative_l_styled, text_negative_styled
 
+
+
 NODE_CLASS_MAPPINGS = {
     "FooocusPromptStyler": FooocusPromptStyler,
     "FooocusPromptStylerAdvanced": FooocusPromptStylerAdvanced,
+    "FooocusPromptStylerChained": FooocusPromptStylerChained,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "FooocusPromptStyler": "👑 Fooocus Prompt Styler",
-    "FooocusPromptStylerAdvanced": "Fooocus Prompt Styler Advanced",
+    "FooocusPromptStylerAdvanced": "👑 Fooocus Prompt Styler Advanced",
+    "FooocusPromptStylerChained": "👑 Fooocus Prompt Styler Chained",
 }
